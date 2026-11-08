@@ -1,6 +1,6 @@
 # Building ravynOS From Source
 
-This guide is for the current Darwin-based ravynOS. A new CMake-based build system is being created for portability and maintainability. Structurally, the build starts by creating a toolchain for the host OS and then using it to build the OS for the same CPU architecture.
+This guide is for the current Darwin-based ravynOS. In this source revision, the checked-in top-level build is driven by BSD make (`bmake`); there is no top-level `CMakeLists.txt`. The build starts by creating a toolchain for the host OS and then uses it to build the OS for the same CPU architecture.
 
 The host toolchain (Default.xctoolchain) includes clang, LLVM, Apple cctools, xcbuild, and other utilities needed to build the OS. Building LLVM initially takes a __long__ time, so be patient. It lives in `<build_dir>/Developer/Toolchains/Default.xctoolchain` once built.
 
@@ -20,14 +20,16 @@ Building it this way takes longer, but there are advantages. It helps make the e
 * A lot of patience
 
 
-__On macOS:__
-* Have a recent Xcode installed
-* Run: `cmake -S /path/to/ravynos -B /path/to/build -GNinja`
-* Run: `cmake --build /path/to/build`
+## Linux development with Nix
 
+The repository's `flake.nix` provides a pinned development shell with Clang 18, LLD, BSD and GNU make, CMake/Ninja, and the documented host libraries and utilities. It sets the `HOST_CC`, `HOST_CXX`, and `HOST_AR` variables for the project build without changing `/usr/bin/cc` or `/usr/bin/c++`.
 
-__On Linux (tested on Arch 2025/12/21):__
-* Install `csh`, `bison`, `binutils`, `flex`, `libdispatch`, and the LLVM linker `lld`
-* Symlink `cc` and `c++` to clang to avoid accidental use of gcc: `rm -f /usr/bin/cc /usr/bin/c++; ln -sf clang /usr/bin/cc; ln -sf clang++ /usr/bin/c++`
-* Run: `cmake --fresh -S /path/to/ravynos -B /path/to/build -GNinja`
-* Run: `cmake --build /path/to/build`
+Enter the shell from the repository root:
+
+```sh
+nix develop
+```
+
+## Full source build
+
+Use the checked-in BSD makefiles and their declared targets from the repository root. A full source build creates the toolchain and SDK under the build directory described by the top-level `Makefile`; it takes substantially longer than entering the Nix development shell.
